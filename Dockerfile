@@ -1,5 +1,5 @@
 FROM debian:latest
-LABEL maintainer='Your Name <you@example.com>'
+LABEL maintainer='HOL0487 <hol0487@st.vsb.cz'
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
