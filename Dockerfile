@@ -1,37 +1,83 @@
 FROM debian:latest
-LABEL maintainer='HOL0487 <hol0487@st.vsb.cz'
+LABEL maintainer='Dominik Holusa <hol0487@st.vsb.cz>'
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+RUN apt update -qq && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt install -y --no-install-recommends \
+        autoconf \
+        file \
+        binutils-dev \
         build-essential \
+        ca-certificates \
         curl \
-        vim-tiny \
+        less \
+        libcurl4-openssl-dev \
+        libedit-dev \
+        libgsm1-dev \
+        libogg-dev \
+        libpopt-dev \
+        libresample1-dev \
+        libspandsp-dev \
+        libspeex-dev \
+        libspeexdsp-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        libvorbis-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libncurses5 ncurses-bin ncurses-term \
+        portaudio19-dev \
+        procps \
+        python3-pip \
+        tcpdump \
+        unixodbc-dev \
         uuid \
         uuid-dev \
-        libxml2-dev \
-        libncurses5-dev \
-        libedit-dev \
-        libssl-dev \
-        libjansson-dev \
-        net-tools \
-        tcpdump && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+        vim-tiny \
+        xmlstarlet \
+        && \
+    apt purge -y --auto-remove && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --system asterisk
 
 ENV ASTERISK_VERSION=20.5.2
 
+RUN mkdir /usr/src/asterisk
 WORKDIR /usr/src/asterisk
-RUN curl -O http://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-${ASTERISK_VERSION}.tar.gz && \
-    tar xzf asterisk-${ASTERISK_VERSION}.tar.gz --strip-components=1 && \
-    ./configure && \
-    make menuselect/menuselect menuselect-tree menuselect.makeopts && \
-    menuselect/menuselect --disable BUILD_NATIVE menuselect.makeopts && \
-    make && make install && make basic-pbx && make config
 
-RUN mkdir -p /etc/asterisk
-COPY pjsip.conf /etc/asterisk/pjsip.conf
-COPY extensions.conf /etc/asterisk/extensions.conf
+ADD http://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-${ASTERISK_VERSION}.tar.gz asterisk.tar.gz
+RUN tar --strip-components 1 -xzf asterisk.tar.gz
+RUN ./configure  --with-resample --with-jansson-bundled
+RUN make menuselect/menuselect menuselect-tree menuselect.makeopts
 
-EXPOSE 5060/udp
-EXPOSE 10000-10100/udp
+# disable BUILD_NATIVE to avoid platform issues
+RUN menuselect/menuselect --disable BUILD_NATIVE menuselect.makeopts && \
+    menuselect/menuselect --enable BETTER_BACKTRACES menuselect.makeopts && \
+    menuselect/menuselect --enable codec_opus menuselect.makeopts
 
-CMD ["asterisk", "-f", "-vvv"]
+# COPY get_sounds.sh get_sounds.sh
+# RUN ./get_sounds.sh
+
+RUN make all
+
+RUN make install && \
+    # make samples && \
+    make basic-pbx && \
+    make progdocs
+    
+RUN chown -R asterisk:asterisk /var/*/asterisk && \
+    chmod -R 750 /var/spool/asterisk
+
+# copy default configs
+# set runuser and rungroup
+RUN mkdir -p /etc/asterisk/ && \
+    cp /usr/src/asterisk/configs/basic-pbx/*.conf /etc/asterisk/ && \
+    sed -i -E 's/^;(run)(user|group)/\1\2/' /etc/asterisk/asterisk.conf
+
+# Uncomment this if you want to remove the asterisk source files.
+#RUN rm -rf /usr/src/asterisk
+
+WORKDIR /home/asterisk
+USER asterisk
+
+CMD asterisk -f
