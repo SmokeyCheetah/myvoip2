@@ -57,6 +57,18 @@ The high level architecture is depicted in the following figure:
 V **./config/kamailio/** vytvoříme soubor **kamailio.cfg**, do kterého vložíme obsah ze stejnojmenného souboru na githubu.
 
 
+.
+├── docker-compose.yml          # Docker konfigurace pro celý stack
+├── config/
+│   └── asterisk/
+│       ├── pjsip.conf          # Konfigurace SIP uživatelů (PJSIP)
+│       └── extensions.conf     # Definice dialplanu pro Asterisk
+├── backend/
+│   └── main.py                 # Backendová logika (např. API nebo logika pro řízení hovorů)
+├── nginx.conf                  # Konfigurace reverzní proxy serveru Nginx
+├── ssl/
+│   ├── nginx.crt               # SSL certifikát pro HTTPS
+│   └── nginx.key               # Privátní klíč certifikátu
 
 
 
@@ -69,18 +81,7 @@ V **./config/kamailio/** vytvoříme soubor **kamailio.cfg**, do kterého vlož�
 Níže je popsána doporučená struktura adresářů jednotlivých komponent.
 
 Struktura adresářů ve "voip-stack":
-.
-├── docker-compose.yml
-├── config/
-│   └── asterisk/
-│       ├── pjsip.conf
-│       └── extensions.conf
-├── backend/
-│   └── main.py
-├── nginx.conf
-├── ssl/
-│   ├── nginx.crt
-│   └── nginx.key
+
 
 
 V souboru docker-compose.yml je nutno definovat veškeré kontejnery
