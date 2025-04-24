@@ -34,7 +34,7 @@ The high level architecture is depicted in the following figure:
 
 `docker run hello-world`
 
-# # Instalace docker compose
+# Instalace docker compose
 
 `curl -s https://api.github.com/repos/docker/compose/releases/latest | grep browser_download_url | grep docker-compose-linux-x86_64 | cut -d '"' -f 4 | wget -qi -`
 
@@ -44,44 +44,22 @@ The high level architecture is depicted in the following figure:
 
 `docker-compose version`
 
-## Vytváření adresáře
+# Vytváření adresáře
 
 `mkdir -p ~/voip-stack`
 
 `cd ~/voip-stack`
 
-## Kamailio
+# Kamailio
 
 `mkdir -p ./config/kamailio`
 
-V **./config/kamailio/** vytvoříme soubor **kamailio.cfg**, do kterého vložíme obsah ze stejnojmenného souboru na githubu.
+V **./config/kamailio/** vytvoříme soubor **kamailio.cfg**, do kterého vložíme obsah ze stejnojmenného souboru na githubu. Stejný proces se provede se souborem **dispatcher.list**.
+
+# Asterisk
+
+`mkdir -p ./config/asterisk`
+
+V **./config/asterisk/** vytvoříme soubor **pjsip.conf**, do kterého vložíme obsah ze stejnojmenného souboru na githubu. Stejný proces se provede se souborem **extensions.conf**.
 
 
-.
-├── docker-compose.yml          # Docker konfigurace pro celý stack
-├── config/
-│   └── asterisk/
-│       ├── pjsip.conf          # Konfigurace SIP uživatelů (PJSIP)
-│       └── extensions.conf     # Definice dialplanu pro Asterisk
-├── backend/
-│   └── main.py                 # Backendová logika (např. API nebo logika pro řízení hovorů)
-├── nginx.conf                  # Konfigurace reverzní proxy serveru Nginx
-├── ssl/
-│   ├── nginx.crt               # SSL certifikát pro HTTPS
-│   └── nginx.key               # Privátní klíč certifikátu
-
-
-
-
-
-
-
-
-
-Níže je popsána doporučená struktura adresářů jednotlivých komponent.
-
-Struktura adresářů ve "voip-stack":
-
-
-
-V souboru docker-compose.yml je nutno definovat veškeré kontejnery
